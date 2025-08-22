@@ -1,0 +1,245 @@
+<h2 class="heading-custom">
+    <i class="fa fa-calendar-check me-2"></i> VC Commitments
+</h2>
+
+
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <!-- Left side buttons -->
+    <div class="d-flex gap-2">
+        @*<a href="@Url.Action("DownloadPDF", "VCCommitment", new { weekOffset = ViewBag.WeekOffset })"
+               class="btn btn-info shadow-sm rounded-pill px-4">
+                <i class="fa fa-file-pdf-o me-2"></i> Download PDF
+            </a>*@
+        <a href="@Url.Action("DownloadPDF", "VCCommitment", new { weekOffset = ViewBag.WeekOffset })"
+           class="btn btn-primary">Download This Week</a>
+        <a href="@Url.Action("DownloadPDF", "VCCommitment", new { all = true })"
+           class="btn btn-info">Download All Events</a>
+
+
+
+
+        <a href="@Url.Action("Create", "VCCommitment")" class="btn btn-secondary shadow-sm rounded-pill px-4">
+            <i class="fa fa-plus me-2"></i> Create New Event
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-center gap-2 mb-4">
+        <!-- Previous Button -->
+        <a href="@Url.Action("FilterByWeek", "VCCommitment", new { weekOffset = (ViewBag.WeekOffset ?? 0) - 1 })"
+           class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="fa fa-arrow-left me-2"></i> Previous Week
+        </a>
+
+        <!-- Week Label -->
+        <!-- Next Button -->
+        <a href="@Url.Action("FilterByWeek", "VCCommitment", new { weekOffset = (ViewBag.WeekOffset ?? 0) + 1 })"
+           class="btn btn-info shadow-sm rounded-pill px-4">
+            <i class="fa fa-arrow-right me-2"></i> Next Week
+        </a>
+    </div>
+
+
+
+</div>
+
+<span class="align-self-center fw-bold">
+    @((ViewBag.WeekStart != null && ViewBag.WeekEnd != null)
+    ? $"{((DateTime)ViewBag.WeekStart):dd MMM yyyy} - {((DateTime)ViewBag.WeekEnd):dd MMM yyyy}"
+    : "All events")
+</span>
+
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped align-middle mb-0">
+            <thead class="table-secondary text-dark">
+                <tr>
+                    <th>📆 Day</th>
+                    <th>📅 Event Date</th>
+                    <th>📝 Activity</th>
+                    <th>👤 Responsible</th>
+                    <th>⏰ Start</th>
+                    <th>⏳ End</th>
+                    <th>📍 Venue</th>
+                    <th>👥 Members</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.Commitments != null)
+                {
+                    var rows = ViewBag.Commitments as System.Data.DataTable;
+
+                    if (rows.Rows.Count > 0)
+                    {
+                        var groups = rows.Rows.Cast<System.Data.DataRow>()
+                                              .GroupBy(r => Convert.ToDateTime(r["EventDate"]))
+                                              .OrderBy(g => g.Key);
+
+                        foreach (var group in groups)
+                        {
+                            bool firstRow = true;
+                            foreach (var row in group)
+                            {
+                                <tr class="table-row-hover">
+                                    @if (firstRow)
+                                    {
+                                        <td rowspan="@group.Count()" class="fw-bold text-secondary bg-light">
+                                            @group.Key.ToString("dddd")  <!-- Day Name -->
+                                        </td>
+                                        <td rowspan="@group.Count()" class="fw-bold text-primary bg-light">
+                                            @group.Key.ToString("yyyy-MM-dd")
+                                        </td>
+                                        firstRow = false;
+                                    }
+                                    <td>@row["Activity"]</td>
+                                    <td>@row["Responsible"]</td>
+                                    <td>@(TimeSpan.TryParse(row["StartTime"]?.ToString(), out var st) ? st.ToString(@"hh\:mm") : "")</td>
+                                    <td>@(TimeSpan.TryParse(row["EndTime"]?.ToString(), out var et) ? et.ToString(@"hh\:mm") : "")</td>
+                                    <td>@row["Venue"]</td>
+                                    <td>@row["Members"]</td>
+                                </tr>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fa fa-info-circle me-2"></i> No events for this week
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fa fa-info-circle me-2"></i> No events found
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+<style>
+    /* Button Styles with shades of #1a3c5e */
+    /* Button Styles */
+    .btn {
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+
+    /* Primary Button (Base color: #1a3c5e) */
+    .btn-primary {
+        background-color: #1a3c5e;
+        color: #ffffff;
+    }
+
+        .btn-primary:hover {
+            background-color: #142f4a; /* Darker shade */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 60, 94, 0.3);
+        }
+
+    /* Info Button (Lighter shade) */
+    .btn-info {
+        background-color: #2a567e;
+        color: #ffffff;
+    }
+
+        .btn-info:hover {
+            background-color: #224466;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(42, 86, 126, 0.3);
+        }
+
+    /* Secondary Button (Even lighter shade) */
+    .btn-secondary {
+        background-color: #3a709e;
+        color: #ffffff;
+    }
+
+        .btn-secondary:hover {
+            background-color: #2f5b82;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 112, 158, 0.3);
+        }
+
+    /* Button Container Alignment */
+    .d-flex.gap-2 {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    /* Week Navigation Buttons Container */
+    .d-flex.justify-content-center.gap-2 {
+        justify-content: center;
+        margin-top: 1rem; /* Add spacing from header */
+        margin-bottom: 1.5rem; /* Ensure spacing below */
+    }
+
+
+/* Icon Styles inside Buttons */
+.fa {
+    margin-right: 8px;
+    font-size: 1rem;
+}
+
+
+
+    .table {
+        border-radius: 6px;
+        overflow: hidden;
+        color: black;
+    }
+
+        .table thead {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            color: black;
+        }
+
+    .table-row-hover:hover {
+        background: #f1f7ff !important;
+        transition: background 0.3s ease;
+    }
+
+    .btn {
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .heading-custom {
+        background-color: #1a3c5e;
+        color: white;
+        border-radius: 12px 12px 0 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 12px;
+        margin-bottom: 0;
+    }
+
+</style>
